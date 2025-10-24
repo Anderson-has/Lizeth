@@ -362,7 +362,7 @@ export class GestorLogros {
       if (logro.activo && 
           logro.criterios?.escenario === 'torreValorMedio' && 
           logro.criterios?.teorema === 'segundo-teorema' &&
-          !progreso.logros.includes(logro.id)) {
+          !(progreso.logros || []).includes(logro.id)) {
         
         console.log(`🔍 Verificando logro: ${logro.id} - ${logro.nombre}`)
         if (this.verificarCriteriosSegundoTeorema(logro, datosSegundoTeorema)) {
@@ -385,8 +385,7 @@ export class GestorLogros {
     switch (logro.id) {
       case 'primera_antiderivada':
         // Se desbloquea cuando se completa la antiderivada correctamente
-        const antiderivadaCompletada = datosSegundoTeorema.antiderivadaCorrecta && 
-                                     datosSegundoTeorema.pasoCompletado >= 2
+        const antiderivadaCompletada = datosSegundoTeorema.antiderivadaCorrecta
         console.log('🎯 Verificando primera_antiderivada:', {
           antiderivadaCorrecta: datosSegundoTeorema.antiderivadaCorrecta,
           pasoCompletado: datosSegundoTeorema.pasoCompletado,
@@ -396,8 +395,7 @@ export class GestorLogros {
 
       case 'calculador_experto':
         // Se desbloquea cuando se completa la evaluación correctamente
-        const evaluacionCompletada = datosSegundoTeorema.evaluacionCorrecta && 
-                                   datosSegundoTeorema.pasoCompletado >= 3
+        const evaluacionCompletada = datosSegundoTeorema.evaluacionCorrecta
         console.log('⭐ Verificando calculador_experto:', {
           evaluacionCorrecta: datosSegundoTeorema.evaluacionCorrecta,
           pasoCompletado: datosSegundoTeorema.pasoCompletado,

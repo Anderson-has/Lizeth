@@ -120,20 +120,40 @@ function TorreValorMedioDemo() {
   // ✅ ESTADO PARA CONTROLAR PASOS HABILITADOS
   const [pasosHabilitados, setPasosHabilitados] = useState({
     paso1: true,  // Siempre habilitado
-    paso2: false, // Se habilita cuando se completa el logro "primera_antiderivada"
-    paso3: false, // Se habilita cuando se completa el logro "calculador_experto"
-    paso4: false  // Se habilita cuando se completa el logro "verificador"
+    paso2: true,  // Siempre habilitado (selección de función)
+    paso3: false, // Se habilita cuando se completa el logro "primera_antiderivada"
+    paso4: false  // Se habilita cuando se completa el logro "calculador_experto"
   })
 
   // ✅ ACTUALIZAR PASOS HABILITADOS BASÁNDOSE EN LOGROS
   const actualizarPasosHabilitados = useCallback((logrosDesbloqueados) => {
-    setPasosHabilitados(prev => ({
-      paso1: true, // Siempre habilitado
-      paso2: logrosDesbloqueados.includes('primera_antiderivada'),
-      paso3: logrosDesbloqueados.includes('calculador_experto'),
-      paso4: logrosDesbloqueados.includes('verificador')
-    }))
+    console.log('🔄 ACTUALIZAR PASOS HABILITADOS - INICIO')
+    console.log('- logrosDesbloqueados recibidos:', logrosDesbloqueados)
+    console.log('- logrosDesbloqueados.length:', logrosDesbloqueados.length)
+    console.log('- incluye primera_antiderivada:', logrosDesbloqueados.some(logro => logro.id === 'primera_antiderivada'))
+    console.log('- incluye calculador_experto:', logrosDesbloqueados.some(logro => logro.id === 'calculador_experto'))
+    
+    setPasosHabilitados(prev => {
+      console.log('- estado anterior de pasos:', prev)
+      
+      const nuevosPasos = {
+        paso1: true, // Siempre habilitado
+        paso2: true, // Siempre habilitado (selección de función)
+        paso3: logrosDesbloqueados.some(logro => logro.id === 'primera_antiderivada'), // Se habilita cuando se completa la antiderivada
+        paso4: logrosDesbloqueados.some(logro => logro.id === 'calculador_experto') // Se habilita cuando se completa la evaluación
+      }
+      
+      console.log('🔄 Nuevos pasos habilitados:', nuevosPasos)
+      console.log('🔄 ACTUALIZAR PASOS HABILITADOS - FIN')
+      return nuevosPasos
+    })
   }, [])
+
+  // ✅ DEBUG: MONITOREAR CAMBIOS EN PASOS HABILITADOS
+  useEffect(() => {
+    console.log('🔍 ESTADO DE PASOS HABILITADOS ACTUALIZADO:', pasosHabilitados)
+  }, [pasosHabilitados])
+
   const [errorEvaluacion, setErrorEvaluacion] = useState('')
   
   // Estado para función personalizada del Segundo Teorema
