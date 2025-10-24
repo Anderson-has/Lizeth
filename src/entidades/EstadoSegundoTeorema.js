@@ -263,6 +263,23 @@ export class EstadoSegundoTeorema {
         return this.procesoCompletado
     }
 
+    // ✅ OBTENER PASOS COMPLETADOS
+    obtenerPasosCompletados() {
+        return this.pasoActual - 1 // Los pasos completados son los anteriores al actual
+    }
+
+    // ✅ OBTENER FUNCIONES COMPLETADAS
+    obtenerFuncionesCompletadas() {
+        // Retorna un array con las funciones que se han completado exitosamente
+        const funcionesCompletadas = []
+        
+        if (this.tipoFuncion && this.procesoCompletado) {
+            funcionesCompletadas.push(this.tipoFuncion)
+        }
+        
+        return funcionesCompletadas
+    }
+
     obtenerNumeroIntentos() {
         return this.numeroIntentos
     }

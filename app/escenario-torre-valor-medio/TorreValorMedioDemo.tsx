@@ -116,6 +116,24 @@ function TorreValorMedioDemo() {
   const [resultadoIntegral, setResultadoIntegral] = useState(0)
   const [pasoActualSegundoTeorema, setPasoActualSegundoTeorema] = useState(1)
   const [errorAntiderivada, setErrorAntiderivada] = useState('')
+  
+  // ✅ ESTADO PARA CONTROLAR PASOS HABILITADOS
+  const [pasosHabilitados, setPasosHabilitados] = useState({
+    paso1: true,  // Siempre habilitado
+    paso2: false, // Se habilita cuando se completa el logro "primera_antiderivada"
+    paso3: false, // Se habilita cuando se completa el logro "calculador_experto"
+    paso4: false  // Se habilita cuando se completa el logro "verificador"
+  })
+
+  // ✅ ACTUALIZAR PASOS HABILITADOS BASÁNDOSE EN LOGROS
+  const actualizarPasosHabilitados = useCallback((logrosDesbloqueados) => {
+    setPasosHabilitados(prev => ({
+      paso1: true, // Siempre habilitado
+      paso2: logrosDesbloqueados.includes('primera_antiderivada'),
+      paso3: logrosDesbloqueados.includes('calculador_experto'),
+      paso4: logrosDesbloqueados.includes('verificador')
+    }))
+  }, [])
   const [errorEvaluacion, setErrorEvaluacion] = useState('')
   
   // Estado para función personalizada del Segundo Teorema
@@ -183,9 +201,9 @@ function TorreValorMedioDemo() {
           }
           
           escenario.configurarCanvasSegundoTeorema(canvas)
-          console.log('✅ Canvas Segundo Teorema configurado')
-        } catch (error) {
-          console.error('❌ Error configurando canvas Segundo Teorema:', error)
+        console.log('✅ Canvas Segundo Teorema configurado')
+      } catch (error) {
+        console.error('❌ Error configurando canvas Segundo Teorema:', error)
           // Reintentar después de un pequeño delay
           setTimeout(() => {
             try {
@@ -547,6 +565,12 @@ function TorreValorMedioDemo() {
         setMostrarTecladoSegundoTeorema(false)
         console.log('✅ Función establecida en el escenario')
         
+        // ✅ HABILITAR PASO 2 CUANDO SE SELECCIONA UNA FUNCIÓN PREDEFINIDA
+        setPasosHabilitados(prev => ({
+          ...prev,
+          paso2: true
+        }))
+        
         // Forzar renderizado inmediato después de establecer la función
         setTimeout(() => {
           try {
@@ -648,6 +672,12 @@ function TorreValorMedioDemo() {
         
         setErrorFuncionPersonalizadaSegundoTeorema('')
         
+        // ✅ HABILITAR PASO 2 CUANDO SE SELECCIONA UNA FUNCIÓN VÁLIDA
+        setPasosHabilitados(prev => ({
+          ...prev,
+          paso2: true
+        }))
+        
         // Forzar renderizado después de cambiar la función
         setTimeout(() => {
           if (escenario) {
@@ -683,6 +713,19 @@ function TorreValorMedioDemo() {
         escenario.establecerAntiderivadaUsuario(antiderivadaUsuario)
         escenario.avanzarPasoSegundoTeorema()
         setPasoActualSegundoTeorema(2)
+        
+        // ✅ VERIFICAR LOGROS DEL SEGUNDO TEOREMA
+        try {
+          const logrosDesbloqueados = escenario.verificarLogrosSegundoTeorema()
+          if (logrosDesbloqueados.length > 0) {
+            console.log('🏆 Logros Segundo Teorema desbloqueados:', logrosDesbloqueados)
+            // Actualizar pasos habilitados basándose en los logros
+            actualizarPasosHabilitados(logrosDesbloqueados)
+            // Aquí podrías mostrar una notificación al usuario
+          }
+        } catch (error) {
+          console.error('Error verificando logros Segundo Teorema:', error)
+        }
       } else {
         setErrorAntiderivada(validacion.error)
       }
@@ -698,6 +741,19 @@ function TorreValorMedioDemo() {
         escenario.establecerEvaluacionLimites(evaluacionA, evaluacionB)
         escenario.avanzarPasoSegundoTeorema()
         setPasoActualSegundoTeorema(3)
+        
+        // ✅ VERIFICAR LOGROS DEL SEGUNDO TEOREMA
+        try {
+          const logrosDesbloqueados = escenario.verificarLogrosSegundoTeorema()
+          if (logrosDesbloqueados.length > 0) {
+            console.log('🏆 Logros Segundo Teorema desbloqueados:', logrosDesbloqueados)
+            // Actualizar pasos habilitados basándose en los logros
+            actualizarPasosHabilitados(logrosDesbloqueados)
+            // Aquí podrías mostrar una notificación al usuario
+          }
+        } catch (error) {
+          console.error('Error verificando logros Segundo Teorema:', error)
+        }
       } else {
         setErrorEvaluacion(validacion.error)
       }
@@ -750,12 +806,12 @@ function TorreValorMedioDemo() {
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1"></div>
             <div className="flex-1 text-center">
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                🏰 Torre del Valor Medio
-              </h1>
-              <p className="text-lg text-gray-600">
-                Bienvenido al reino mágico del cálculo, donde las derivadas e integrales se encuentran en perfecta armonía
-              </p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            🏰 Torre del Valor Medio
+          </h1>
+          <p className="text-lg text-gray-600">
+            Bienvenido al reino mágico del cálculo, donde las derivadas e integrales se encuentran en perfecta armonía
+          </p>
             </div>
             <div className="flex-1 flex justify-end">
               <Button 
@@ -1516,111 +1572,111 @@ function TorreValorMedioDemo() {
                     </Card>
 
                     {/* Función Personalizada - Solo se muestra cuando está seleccionada */}
-                    {funcionSegundoTeorema === 'personalizada' && (
+                        {funcionSegundoTeorema === 'personalizada' && (
                       <div className="bg-orange-50 p-4 rounded-lg mb-4">
                         <h3 className="text-lg font-semibold text-orange-800 mb-2">📝 Función Personalizada</h3>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Ingresa tu función personalizada:</label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={funcionPersonalizadaSegundoTeorema}
-                              onChange={(e) => handleFuncionPersonalizadaSegundoTeorema(e.target.value)}
+                            <label className="text-sm font-medium">Ingresa tu función personalizada:</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={funcionPersonalizadaSegundoTeorema}
+                                onChange={(e) => handleFuncionPersonalizadaSegundoTeorema(e.target.value)}
                               placeholder="Ej: x**2 + 3*x + 1, sin(x), cos(x), exp(x)"
-                              className="flex-1 p-2 border rounded text-sm"
-                            />
-                            <Button
-                              onClick={() => setMostrarTecladoSegundoTeorema(!mostrarTecladoSegundoTeorema)}
-                              variant="outline"
-                              size="sm"
-                            >
-                              {mostrarTecladoSegundoTeorema ? "Ocultar" : "Mostrar"} Teclado
-                            </Button>
-                          </div>
-                          
-                          {errorFuncionPersonalizadaSegundoTeorema && (
-                            <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                              {errorFuncionPersonalizadaSegundoTeorema}
+                                className="flex-1 p-2 border rounded text-sm"
+                              />
+                              <Button
+                                onClick={() => setMostrarTecladoSegundoTeorema(!mostrarTecladoSegundoTeorema)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                {mostrarTecladoSegundoTeorema ? "Ocultar" : "Mostrar"} Teclado
+                              </Button>
                             </div>
-                          )}
-                          
-                          {/* Teclado Matemático para función personalizada */}
-                          {mostrarTecladoSegundoTeorema && (
-                            <div className="bg-gray-50 p-4 rounded-lg mt-2">
-                              <h4 className="text-sm font-medium mb-2">Teclado Matemático</h4>
-                              <div className="grid grid-cols-6 gap-2">
-                                {/* Números */}
-                                {['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
-                                  <Button
-                                    key={num}
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + num)}
-                                    className="text-xs"
-                                  >
-                                    {num}
-                                  </Button>
-                                ))}
-                                
-                                {/* Operaciones */}
-                                {['+', '-', '*', '/', '^', '(', ')'].map(op => (
-                                  <Button
-                                    key={op}
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + op)}
-                                    className="text-xs"
-                                  >
-                                    {op}
-                                  </Button>
-                                ))}
-                                
-                                {/* Funciones */}
-                                {['sin', 'cos', 'tan', 'log', 'exp', 'sqrt'].map(func => (
-                                  <Button
-                                    key={func}
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + func + '(x)')}
-                                    className="text-xs"
-                                  >
-                                    {func}
-                                  </Button>
-                                ))}
-                                
-                                {/* Variable x */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + 'x')}
-                                  className="text-xs"
-                                >
-                                  x
-                                </Button>
-                                
-                                {/* Control */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev.slice(0, -1))}
-                                  className="text-xs"
-                                >
-                                  ←
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setFuncionPersonalizadaSegundoTeorema('')}
-                                  className="text-xs"
-                                >
-                                  C
-                                </Button>
+                            
+                            {errorFuncionPersonalizadaSegundoTeorema && (
+                              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                                {errorFuncionPersonalizadaSegundoTeorema}
                               </div>
-                            </div>
-                          )}
+                            )}
+                            
+                            {/* Teclado Matemático para función personalizada */}
+                            {mostrarTecladoSegundoTeorema && (
+                              <div className="bg-gray-50 p-4 rounded-lg mt-2">
+                                <h4 className="text-sm font-medium mb-2">Teclado Matemático</h4>
+                                <div className="grid grid-cols-6 gap-2">
+                                  {/* Números */}
+                                  {['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
+                                    <Button
+                                      key={num}
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + num)}
+                                      className="text-xs"
+                                    >
+                                      {num}
+                                    </Button>
+                                  ))}
+                                  
+                                  {/* Operaciones */}
+                                  {['+', '-', '*', '/', '^', '(', ')'].map(op => (
+                                    <Button
+                                      key={op}
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + op)}
+                                      className="text-xs"
+                                    >
+                                      {op}
+                                    </Button>
+                                  ))}
+                                  
+                                  {/* Funciones */}
+                                  {['sin', 'cos', 'tan', 'log', 'exp', 'sqrt'].map(func => (
+                                    <Button
+                                      key={func}
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + func + '(x)')}
+                                      className="text-xs"
+                                    >
+                                      {func}
+                                    </Button>
+                                  ))}
+                                  
+                                  {/* Variable x */}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + 'x')}
+                                    className="text-xs"
+                                  >
+                                    x
+                                  </Button>
+                                  
+                                  {/* Control */}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev.slice(0, -1))}
+                                    className="text-xs"
+                                  >
+                                    ←
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setFuncionPersonalizadaSegundoTeorema('')}
+                                    className="text-xs"
+                                  >
+                                    C
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
                         </div>
-                      </div>
-                    )}
+                          </div>
+                        )}
 
                     {/* Objetivo Principal */}
                     <div className="bg-purple-100 p-4 rounded-lg mb-4">
@@ -1649,8 +1705,19 @@ function TorreValorMedioDemo() {
                     </div>
 
                     {/* Paso 2: Encuentra la antiderivada */}
-                    <div className="bg-green-50 p-4 rounded-lg mb-4">
-                      <h3 className="text-lg font-semibold text-green-800 mb-2">Paso 2: Encuentra la antiderivada F(x)</h3>
+                    <div className={`p-4 rounded-lg mb-4 transition-all ${
+                      pasosHabilitados.paso2 
+                        ? 'bg-green-50 border-2 border-green-200' 
+                        : 'bg-gray-100 border-2 border-gray-300 opacity-60'
+                    }`}>
+                      <h3 className={`text-lg font-semibold mb-2 ${
+                        pasosHabilitados.paso2 ? 'text-green-800' : 'text-gray-500'
+                      }`}>
+                        Paso 2: Encuentra la antiderivada F(x)
+                        {!pasosHabilitados.paso2 && (
+                          <span className="ml-2 text-sm font-normal">🔒 (Completa el Paso 1 primero)</span>
+                        )}
+                      </h3>
                       <div className="mb-4">
                         <div className="text-gray-700 mb-2">
                           Recuerda: F'(x) = f(x). ¿Qué función al derivarla da {funcionSegundoTeorema === 'lineal' ? 'x' :
@@ -1679,7 +1746,10 @@ function TorreValorMedioDemo() {
                             value={antiderivadaUsuario}
                             onChange={(e) => setAntiderivadaUsuario(e.target.value)}
                             placeholder={funcionSegundoTeorema === 'personalizada' ? "Ej: F(x) (antiderivada de tu función)" : "Ej: -cos(x)"}
-                            className="flex-1 p-2 border rounded text-sm"
+                            disabled={!pasosHabilitados.paso2}
+                            className={`flex-1 p-2 border rounded text-sm ${
+                              !pasosHabilitados.paso2 ? 'bg-gray-100 cursor-not-allowed' : ''
+                            }`}
                           />
                           <Button
                             onClick={() => setMostrarTecladoSegundoTeorema(!mostrarTecladoSegundoTeorema)}
@@ -1771,15 +1841,31 @@ function TorreValorMedioDemo() {
                           </div>
                         )}
                         
-                        <Button onClick={handleValidarAntiderivada} size="sm" className="w-full">
-                          Confirmar
+                        <Button 
+                          onClick={handleValidarAntiderivada} 
+                          size="sm" 
+                          className="w-full"
+                          disabled={!pasosHabilitados.paso2}
+                        >
+                          {pasosHabilitados.paso2 ? 'Confirmar' : '🔒 Paso Bloqueado'}
                         </Button>
                       </div>
                     </div>
 
                     {/* Paso 3: Evalúa en los límites */}
-                    <div className="bg-yellow-50 p-4 rounded-lg mb-4">
-                      <h3 className="text-lg font-semibold text-yellow-800 mb-2">Paso 3: Evalúa en los límites</h3>
+                    <div className={`p-4 rounded-lg mb-4 transition-all ${
+                      pasosHabilitados.paso3 
+                        ? 'bg-yellow-50 border-2 border-yellow-200' 
+                        : 'bg-gray-100 border-2 border-gray-300 opacity-60'
+                    }`}>
+                      <h3 className={`text-lg font-semibold mb-2 ${
+                        pasosHabilitados.paso3 ? 'text-yellow-800' : 'text-gray-500'
+                      }`}>
+                        Paso 3: Evalúa en los límites
+                        {!pasosHabilitados.paso3 && (
+                          <span className="ml-2 text-sm font-normal">🔒 (Completa el Paso 2 primero)</span>
+                        )}
+                      </h3>
                       <div className="mb-4">
                         <div className="text-gray-700 mb-2">
                           Calcula F(a) y F(b) usando tu antiderivada F(x) = {antiderivadaUsuario || 'F(x)'}
@@ -1794,7 +1880,10 @@ function TorreValorMedioDemo() {
                             value={evaluacionA}
                             onChange={(e) => setEvaluacionA(e.target.value)}
                             placeholder={`Ej: F(${limiteASegundoTeorema.toFixed(1)})`}
-                            className="w-full p-2 border rounded text-sm"
+                            disabled={!pasosHabilitados.paso3}
+                            className={`w-full p-2 border rounded text-sm ${
+                              !pasosHabilitados.paso3 ? 'bg-gray-100 cursor-not-allowed' : ''
+                            }`}
                           />
                         </div>
                         
@@ -1805,7 +1894,10 @@ function TorreValorMedioDemo() {
                             value={evaluacionB}
                             onChange={(e) => setEvaluacionB(e.target.value)}
                             placeholder={`Ej: F(${limiteBSegundoTeorema.toFixed(1)})`}
-                            className="w-full p-2 border rounded text-sm"
+                            disabled={!pasosHabilitados.paso3}
+                            className={`w-full p-2 border rounded text-sm ${
+                              !pasosHabilitados.paso3 ? 'bg-gray-100 cursor-not-allowed' : ''
+                            }`}
                           />
                         </div>
                       </div>
@@ -1816,14 +1908,30 @@ function TorreValorMedioDemo() {
                         </div>
                       )}
                       
-                      <Button onClick={handleValidarEvaluacion} size="sm" className="w-full mt-2">
-                        Confirmar
+                      <Button 
+                        onClick={handleValidarEvaluacion} 
+                        size="sm" 
+                        className="w-full mt-2"
+                        disabled={!pasosHabilitados.paso3}
+                      >
+                        {pasosHabilitados.paso3 ? 'Confirmar' : '🔒 Paso Bloqueado'}
                       </Button>
                     </div>
 
                     {/* Paso 4: Calcula la integral */}
-                    <div className="bg-purple-50 p-4 rounded-lg mb-4">
-                      <h3 className="text-lg font-semibold text-purple-800 mb-2">Paso 4: Calcula la integral</h3>
+                    <div className={`p-4 rounded-lg mb-4 transition-all ${
+                      pasosHabilitados.paso4 
+                        ? 'bg-purple-50 border-2 border-purple-200' 
+                        : 'bg-gray-100 border-2 border-gray-300 opacity-60'
+                    }`}>
+                      <h3 className={`text-lg font-semibold mb-2 ${
+                        pasosHabilitados.paso4 ? 'text-purple-800' : 'text-gray-500'
+                      }`}>
+                        Paso 4: Calcula la integral
+                        {!pasosHabilitados.paso4 && (
+                          <span className="ml-2 text-sm font-normal">🔒 (Completa el Paso 3 primero)</span>
+                        )}
+                      </h3>
                       <div className="mb-4">
                         <div className="text-gray-700 mb-2">
                           Usa la fórmula: ∫[{limiteASegundoTeorema.toFixed(1)} → {limiteBSegundoTeorema.toFixed(1)}] f(x)dx = F({limiteBSegundoTeorema.toFixed(1)}) - F({limiteASegundoTeorema.toFixed(1)})
@@ -1843,8 +1951,13 @@ function TorreValorMedioDemo() {
                           </div>
                         </div>
                         
-                        <Button onClick={handleCalcularResultado} size="sm" className="w-full">
-                          Calcular Integral
+                        <Button 
+                          onClick={handleCalcularResultado} 
+                          size="sm" 
+                          className="w-full"
+                          disabled={!pasosHabilitados.paso4}
+                        >
+                          {pasosHabilitados.paso4 ? 'Calcular Integral' : '🔒 Paso Bloqueado'}
                         </Button>
                       </div>
                     </div>
@@ -1896,6 +2009,172 @@ function TorreValorMedioDemo() {
                       </CardContent>
                     </Card>
                   </div>
+
+                  {/* Logros del Segundo Teorema Fundamental */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Trophy className="h-5 w-5" />
+                        Logros del Segundo Teorema Fundamental
+                      </CardTitle>
+                      <CardDescription>
+                        Desbloquea logros completando los pasos del Segundo Teorema Fundamental
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {/* Primera Antiderivada */}
+                        <div className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                          logrosDesbloqueados.includes('primera_antiderivada') 
+                            ? 'bg-yellow-50 border border-yellow-200 shadow-sm' 
+                            : 'bg-gray-50 border border-gray-200'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                            logrosDesbloqueados.includes('primera_antiderivada')
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg' 
+                              : 'bg-gray-300'
+                          }`}>
+                            <span className="text-sm">🎯</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-medium ${
+                              logrosDesbloqueados.includes('primera_antiderivada') ? 'text-yellow-700' : 'text-gray-500'
+                            }`}>
+                              Primera Antiderivada
+                            </span>
+                            <p className={`text-xs mt-0.5 ${
+                              logrosDesbloqueados.includes('primera_antiderivada') ? 'text-yellow-600' : 'text-gray-400'
+                            }`}>
+                              Encuentra tu primera antiderivada correcta
+                            </p>
+                          </div>
+                          {logrosDesbloqueados.includes('primera_antiderivada') && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+
+                        {/* Calculador Experto */}
+                        <div className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                          logrosDesbloqueados.includes('calculador_experto') 
+                            ? 'bg-yellow-50 border border-yellow-200 shadow-sm' 
+                            : 'bg-gray-50 border border-gray-200'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                            logrosDesbloqueados.includes('calculador_experto')
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg' 
+                              : 'bg-gray-300'
+                          }`}>
+                            <span className="text-sm">⭐</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-medium ${
+                              logrosDesbloqueados.includes('calculador_experto') ? 'text-yellow-700' : 'text-gray-500'
+                            }`}>
+                              Calculador Experto
+                            </span>
+                            <p className={`text-xs mt-0.5 ${
+                              logrosDesbloqueados.includes('calculador_experto') ? 'text-yellow-600' : 'text-gray-400'
+                            }`}>
+                              Calcula F(b) - F(a) correctamente
+                            </p>
+                          </div>
+                          {logrosDesbloqueados.includes('calculador_experto') && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+
+                        {/* Verificador */}
+                        <div className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                          logrosDesbloqueados.includes('verificador') 
+                            ? 'bg-yellow-50 border border-yellow-200 shadow-sm' 
+                            : 'bg-gray-50 border border-gray-200'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                            logrosDesbloqueados.includes('verificador')
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg' 
+                              : 'bg-gray-300'
+                          }`}>
+                            <span className="text-sm">🛡️</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-medium ${
+                              logrosDesbloqueados.includes('verificador') ? 'text-yellow-700' : 'text-gray-500'
+                            }`}>
+                              Verificador
+                            </span>
+                            <p className={`text-xs mt-0.5 ${
+                              logrosDesbloqueados.includes('verificador') ? 'text-yellow-600' : 'text-gray-400'
+                            }`}>
+                              Completa los 4 pasos del teorema
+                            </p>
+                          </div>
+                          {logrosDesbloqueados.includes('verificador') && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+
+                        {/* Maestro de Potencias */}
+                        <div className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                          logrosDesbloqueados.includes('maestro_potencias') 
+                            ? 'bg-yellow-50 border border-yellow-200 shadow-sm' 
+                            : 'bg-gray-50 border border-gray-200'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                            logrosDesbloqueados.includes('maestro_potencias')
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg' 
+                              : 'bg-gray-300'
+                          }`}>
+                            <span className="text-sm">⚡</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-medium ${
+                              logrosDesbloqueados.includes('maestro_potencias') ? 'text-yellow-700' : 'text-gray-500'
+                            }`}>
+                              Maestro de Potencias
+                            </span>
+                            <p className={`text-xs mt-0.5 ${
+                              logrosDesbloqueados.includes('maestro_potencias') ? 'text-yellow-600' : 'text-gray-400'
+                            }`}>
+                              Completa ejemplos con x² y x³
+                            </p>
+                          </div>
+                          {logrosDesbloqueados.includes('maestro_potencias') && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+
+                        {/* Trigonométrico */}
+                        <div className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
+                          logrosDesbloqueados.includes('trigonometrico') 
+                            ? 'bg-yellow-50 border border-yellow-200 shadow-sm' 
+                            : 'bg-gray-50 border border-gray-200'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                            logrosDesbloqueados.includes('trigonometrico')
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg' 
+                              : 'bg-gray-300'
+                          }`}>
+                            <span className="text-sm">🕐</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-medium ${
+                              logrosDesbloqueados.includes('trigonometrico') ? 'text-yellow-700' : 'text-gray-500'
+                            }`}>
+                              Trigonométrico
+                            </span>
+                            <p className={`text-xs mt-0.5 ${
+                              logrosDesbloqueados.includes('trigonometrico') ? 'text-yellow-600' : 'text-gray-400'
+                            }`}>
+                              Completa un ejemplo con sin(x) o cos(x)
+                            </p>
+                          </div>
+                          {logrosDesbloqueados.includes('trigonometrico') && (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </TabsContent>
               

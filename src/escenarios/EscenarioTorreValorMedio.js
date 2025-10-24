@@ -352,6 +352,29 @@ export class EscenarioTorreValorMedio extends Escenario {
         return []
     }
 
+    // ✅ VERIFICAR LOGROS SEGUNDO TEOREMA FUNDAMENTAL
+    verificarLogrosSegundoTeorema() {
+        try {
+            const usuarioActual = this.gestorLogros.servicioAuth.obtenerUsuarioActual()
+            if (usuarioActual && usuarioActual.esEstudiante()) {
+                const datosSegundoTeorema = {
+                    pasoCompletado: this.estadoSegundoTeorema.obtenerPasoActual(),
+                    pasosCompletados: this.estadoSegundoTeorema.obtenerPasosCompletados(),
+                    antiderivadaCorrecta: this.estadoSegundoTeorema.obtenerAntiderivadaValida(),
+                    evaluacionCorrecta: this.estadoSegundoTeorema.obtenerEvaluacionValida(),
+                    funcionesCompletadas: this.estadoSegundoTeorema.obtenerFuncionesCompletadas?.() || [],
+                    procesoCompletado: this.estadoSegundoTeorema.obtenerProcesoCompletado()
+                }
+
+                console.log('🏆 Verificando logros Segundo Teorema:', datosSegundoTeorema)
+                return this.gestorLogros.verificarLogrosSegundoTeorema(usuarioActual.id, datosSegundoTeorema)
+            }
+        } catch (error) {
+            console.error('Error verificando logros Segundo Teorema:', error)
+        }
+        return []
+    }
+
     // ✅ VERIFICAR CONDICIONES DEL TEOREMA
     verificarCondicionesTeorema() {
         const funcion = this.estadoTorre.obtenerFuncion()

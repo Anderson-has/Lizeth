@@ -73,7 +73,7 @@ export class Logro {
       if (actividad.escenario === secuenciaRequerida[indiceSecuencia]) {
         indiceSecuencia++
         if (indiceSecuencia === secuenciaRequerida.length) {
-          return true
+      return true
         }
       }
     }

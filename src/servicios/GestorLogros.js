@@ -92,6 +92,82 @@ export class GestorLogros {
         raridad: 'raro'
       }),
 
+      // Logros del Segundo Teorema Fundamental
+      new Logro({
+        id: 'primera_antiderivada',
+        nombre: 'Primera Antiderivada',
+        descripcion: 'Encuentra tu primera antiderivada correcta',
+        tipo: 'especial',
+        criterios: { 
+          escenario: 'torreValorMedio',
+          teorema: 'segundo-teorema',
+          pasoCompletado: 'antiderivada'
+        },
+        icono: '🎯',
+        puntos: 10,
+        raridad: 'comun'
+      }),
+
+      new Logro({
+        id: 'calculador_experto',
+        nombre: 'Calculador Experto',
+        descripcion: 'Calcula F(b) - F(a) correctamente',
+        tipo: 'especial',
+        criterios: { 
+          escenario: 'torreValorMedio',
+          teorema: 'segundo-teorema',
+          pasoCompletado: 'evaluacion'
+        },
+        icono: '⭐',
+        puntos: 15,
+        raridad: 'raro'
+      }),
+
+      new Logro({
+        id: 'verificador',
+        nombre: 'Verificador',
+        descripcion: 'Completa los 4 pasos del teorema',
+        tipo: 'completitud',
+        criterios: { 
+          escenario: 'torreValorMedio',
+          teorema: 'segundo-teorema',
+          pasosCompletados: 4
+        },
+        icono: '🛡️',
+        puntos: 25,
+        raridad: 'raro'
+      }),
+
+      new Logro({
+        id: 'maestro_potencias',
+        nombre: 'Maestro de Potencias',
+        descripcion: 'Completa ejemplos con x² y x³',
+        tipo: 'especial',
+        criterios: { 
+          escenario: 'torreValorMedio',
+          teorema: 'segundo-teorema',
+          funcionesCompletadas: ['cuadratica', 'cubica']
+        },
+        icono: '⚡',
+        puntos: 20,
+        raridad: 'raro'
+      }),
+
+      new Logro({
+        id: 'trigonometrico',
+        nombre: 'Trigonométrico',
+        descripcion: 'Completa un ejemplo con sin(x) o cos(x)',
+        tipo: 'especial',
+        criterios: { 
+          escenario: 'torreValorMedio',
+          teorema: 'segundo-teorema',
+          funcionesCompletadas: ['seno', 'coseno']
+        },
+        icono: '🕐',
+        puntos: 15,
+        raridad: 'raro'
+      }),
+
       // Logros secuenciales
       new Logro({
         id: 'camino_completo',
@@ -159,7 +235,7 @@ export class GestorLogros {
     for (const logro of this.logros) {
       if (logro.activo && !progreso.logros.includes(logro.id)) {
         if (logro.verificarCriterios(progreso)) {
-          logrosDesbloqueados.push(logro)
+        logrosDesbloqueados.push(logro)
           // Agregar logro al estudiante
           estudiante.agregarLogro(logro.id)
         }
@@ -263,6 +339,67 @@ export class GestorLogros {
     }
   }
 
+  // ✅ VERIFICAR LOGROS SEGUNDO TEOREMA FUNDAMENTAL
+  verificarLogrosSegundoTeorema(estudianteId, datosSegundoTeorema) {
+    const usuarios = this.servicioAuth.obtenerTodosLosUsuarios()
+    const estudiante = usuarios.find(u => u.id === estudianteId)
+    
+    if (!estudiante || !estudiante.esEstudiante()) {
+      return []
+    }
+
+    const logrosDesbloqueados = []
+    const progreso = estudiante.obtenerEstadisticas()
+
+    // Verificar cada logro del Segundo Teorema Fundamental
+    for (const logro of this.logros) {
+      if (logro.activo && 
+          logro.criterios?.escenario === 'torreValorMedio' && 
+          logro.criterios?.teorema === 'segundo-teorema' &&
+          !progreso.logros.includes(logro.id)) {
+        
+        if (this.verificarCriteriosSegundoTeorema(logro, datosSegundoTeorema)) {
+          logrosDesbloqueados.push(logro)
+          estudiante.agregarLogro(logro.id)
+          console.log(`🏆 Logro desbloqueado: ${logro.nombre}`)
+        }
+      }
+    }
+
+    return logrosDesbloqueados
+  }
+
+  // ✅ VERIFICAR CRITERIOS ESPECÍFICOS DEL SEGUNDO TEOREMA
+  verificarCriteriosSegundoTeorema(logro, datosSegundoTeorema) {
+    const { pasoCompletado, pasosCompletados, funcionesCompletadas } = logro.criterios
+
+    switch (logro.id) {
+      case 'primera_antiderivada':
+        return datosSegundoTeorema.pasoCompletado === 'antiderivada' && 
+               datosSegundoTeorema.antiderivadaCorrecta
+
+      case 'calculador_experto':
+        return datosSegundoTeorema.pasoCompletado === 'evaluacion' && 
+               datosSegundoTeorema.evaluacionCorrecta
+
+      case 'verificador':
+        return datosSegundoTeorema.pasosCompletados >= 4
+
+      case 'maestro_potencias':
+        return funcionesCompletadas.every(func => 
+          datosSegundoTeorema.funcionesCompletadas?.includes(func)
+        )
+
+      case 'trigonometrico':
+        return funcionesCompletadas.some(func => 
+          datosSegundoTeorema.funcionesCompletadas?.includes(func)
+        )
+
+      default:
+        return false
+    }
+  }
+
   obtenerLogrosPorRaridadEstudiante(logrosObtenidos) {
     const logros = this.logros.filter(logro => logrosObtenidos.includes(logro.id))
     const porRaridad = {
@@ -328,7 +465,7 @@ export class GestorLogros {
     return Object.entries(conteoLogros)
       .map(([logroId, conteo]) => {
         const logro = this.logros.find(l => l.id === logroId)
-        return {
+    return {
           logro,
           conteo,
           porcentaje: (conteo / estudiantes.length) * 100
