@@ -1515,13 +1515,6 @@ function TorreValorMedioDemo() {
                       </CardContent>
                     </Card>
 
-                    {/* Objetivo Principal */}
-                    <div className="bg-purple-100 p-4 rounded-lg mb-4">
-                      <h3 className="text-lg font-semibold text-purple-800 mb-2">
-                        🎯 Objetivo: Usa el Segundo Teorema Fundamental para calcular la integral
-                      </h3>
-                    </div>
-
                     {/* Función Personalizada - Solo se muestra cuando está seleccionada */}
                     {funcionSegundoTeorema === 'personalizada' && (
                       <div className="bg-orange-50 p-4 rounded-lg mb-4">
@@ -1628,6 +1621,13 @@ function TorreValorMedioDemo() {
                         </div>
                       </div>
                     )}
+
+                    {/* Objetivo Principal */}
+                    <div className="bg-purple-100 p-4 rounded-lg mb-4">
+                      <h3 className="text-lg font-semibold text-purple-800 mb-2">
+                        🎯 Objetivo: Usa el Segundo Teorema Fundamental para calcular la integral
+                      </h3>
+                    </div>
 
                     {/* Paso 1: Función dada */}
                     <div className="bg-blue-50 p-4 rounded-lg mb-4">
