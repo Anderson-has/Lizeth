@@ -92,21 +92,33 @@ export class EstadoSegundoTeorema {
             case 'personalizada':
                 if (funcionPersonalizada) {
                     try {
-                        this.funcionActual = new Function('x', `return ${funcionPersonalizada}`)
+                        // Validar sintaxis básica
+                        const testFunc = new Function('x', `return ${funcionPersonalizada}`)
+                        const testValue = testFunc(1)
+                        
+                        if (!isFinite(testValue)) {
+                            this.funcionPersonalizadaValida = false
+                            this.errorFuncionPersonalizada = 'La función produce valores no finitos'
+                            this.funcionActual = null
+                            console.log('❌ Función personalizada produce valores no finitos')
+                            return
+                        }
+                        
+                        this.funcionActual = testFunc
                         this.funcionPersonalizadaValida = true
                         this.errorFuncionPersonalizada = ''
                         // Para función personalizada, no podemos determinar automáticamente la antiderivada
                         this.antiderivadaCorrecta = 'F(x)' // Placeholder
-                        console.log('✅ Función personalizada establecida')
+                        console.log('✅ Función personalizada establecida y validada')
                     } catch (error) {
                         this.funcionPersonalizadaValida = false
-                        this.errorFuncionPersonalizada = 'Sintaxis inválida'
+                        this.errorFuncionPersonalizada = 'Sintaxis inválida en la función personalizada'
                         this.funcionActual = null
                         console.error('❌ Error en función personalizada:', error)
                     }
                 } else {
                     this.funcionPersonalizadaValida = false
-                    this.errorFuncionPersonalizada = 'Función personalizada requerida'
+                    this.errorFuncionPersonalizada = 'Debe ingresar una función personalizada'
                     this.funcionActual = null
                     console.log('⚠️ Función personalizada requerida')
                 }

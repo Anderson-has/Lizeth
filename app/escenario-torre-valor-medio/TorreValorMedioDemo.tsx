@@ -537,8 +537,9 @@ function TorreValorMedioDemo() {
     if (escenario) {
       escenario.cambiarTeoremaActivo('segundo-teorema')
       if (tipo === 'personalizada') {
-        // Para función personalizada, no establecer función aún hasta que sea válida
+        // Para función personalizada, establecer función vacía inicialmente
         setMostrarTecladoSegundoTeorema(true)
+        escenario.establecerFuncionSegundoTeorema(tipo, funcionPersonalizadaSegundoTeorema || '')
         console.log('📝 Función personalizada seleccionada')
       } else {
         console.log('🎯 Estableciendo función del segundo teorema:', tipo)
@@ -614,7 +615,12 @@ function TorreValorMedioDemo() {
     setFuncionPersonalizadaSegundoTeorema(funcion)
     setErrorFuncionPersonalizadaSegundoTeorema('')
     
-    if (escenario && funcion.trim()) {
+    // Actualizar inmediatamente en el escenario para mostrar la función
+    if (escenario) {
+      escenario.establecerFuncionSegundoTeorema('personalizada', funcion)
+    }
+    
+    if (funcion.trim()) {
       try {
         // Validar sintaxis básica
         const testFunc = new Function('x', `return ${funcion}`)
@@ -625,9 +631,29 @@ function TorreValorMedioDemo() {
           return
         }
         
-        // Establecer la función personalizada
-        escenario.establecerFuncionSegundoTeorema('personalizada', funcion)
+        // Validar en múltiples puntos para asegurar que la función es válida
+        const puntosPrueba = [-2, -1, 0, 1, 2]
+        for (const x of puntosPrueba) {
+          try {
+            const valor = testFunc(x)
+            if (!isFinite(valor)) {
+              setErrorFuncionPersonalizadaSegundoTeorema('La función produce valores no finitos en algunos puntos')
+              return
+            }
+          } catch (error) {
+            setErrorFuncionPersonalizadaSegundoTeorema('La función no es válida para todos los valores de x')
+            return
+          }
+        }
+        
         setErrorFuncionPersonalizadaSegundoTeorema('')
+        
+        // Forzar renderizado después de cambiar la función
+        setTimeout(() => {
+          if (escenario) {
+            escenario.renderizarSegundoTeorema()
+          }
+        }, 100)
       } catch (error) {
         setErrorFuncionPersonalizadaSegundoTeorema('Sintaxis inválida en la función')
       }
@@ -1496,6 +1522,113 @@ function TorreValorMedioDemo() {
                       </h3>
                     </div>
 
+                    {/* Función Personalizada - Solo se muestra cuando está seleccionada */}
+                    {funcionSegundoTeorema === 'personalizada' && (
+                      <div className="bg-orange-50 p-4 rounded-lg mb-4">
+                        <h3 className="text-lg font-semibold text-orange-800 mb-2">📝 Función Personalizada</h3>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Ingresa tu función personalizada:</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={funcionPersonalizadaSegundoTeorema}
+                              onChange={(e) => handleFuncionPersonalizadaSegundoTeorema(e.target.value)}
+                              placeholder="Ej: x**2 + 3*x + 1, sin(x), cos(x), exp(x)"
+                              className="flex-1 p-2 border rounded text-sm"
+                            />
+                            <Button
+                              onClick={() => setMostrarTecladoSegundoTeorema(!mostrarTecladoSegundoTeorema)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              {mostrarTecladoSegundoTeorema ? "Ocultar" : "Mostrar"} Teclado
+                            </Button>
+                          </div>
+                          
+                          {errorFuncionPersonalizadaSegundoTeorema && (
+                            <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                              {errorFuncionPersonalizadaSegundoTeorema}
+                            </div>
+                          )}
+                          
+                          {/* Teclado Matemático para función personalizada */}
+                          {mostrarTecladoSegundoTeorema && (
+                            <div className="bg-gray-50 p-4 rounded-lg mt-2">
+                              <h4 className="text-sm font-medium mb-2">Teclado Matemático</h4>
+                              <div className="grid grid-cols-6 gap-2">
+                                {/* Números */}
+                                {['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
+                                  <Button
+                                    key={num}
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + num)}
+                                    className="text-xs"
+                                  >
+                                    {num}
+                                  </Button>
+                                ))}
+                                
+                                {/* Operaciones */}
+                                {['+', '-', '*', '/', '^', '(', ')'].map(op => (
+                                  <Button
+                                    key={op}
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + op)}
+                                    className="text-xs"
+                                  >
+                                    {op}
+                                  </Button>
+                                ))}
+                                
+                                {/* Funciones */}
+                                {['sin', 'cos', 'tan', 'log', 'exp', 'sqrt'].map(func => (
+                                  <Button
+                                    key={func}
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + func + '(x)')}
+                                    className="text-xs"
+                                  >
+                                    {func}
+                                  </Button>
+                                ))}
+                                
+                                {/* Variable x */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + 'x')}
+                                  className="text-xs"
+                                >
+                                  x
+                                </Button>
+                                
+                                {/* Control */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev.slice(0, -1))}
+                                  className="text-xs"
+                                >
+                                  ←
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setFuncionPersonalizadaSegundoTeorema('')}
+                                  className="text-xs"
+                                >
+                                  C
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Paso 1: Función dada */}
                     <div className="bg-blue-50 p-4 rounded-lg mb-4">
                       <h3 className="text-lg font-semibold text-blue-800 mb-2">Paso 1: Función dada</h3>
@@ -1512,109 +1645,6 @@ function TorreValorMedioDemo() {
                           Queremos calcular: ∫[{limiteASegundoTeorema.toFixed(1)} → {limiteBSegundoTeorema.toFixed(1)}] f(x)dx
                         </div>
                         
-                        {/* Entrada de función personalizada */}
-                        {funcionSegundoTeorema === 'personalizada' && (
-                          <div className="mt-4 space-y-2">
-                            <label className="text-sm font-medium">Ingresa tu función personalizada:</label>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={funcionPersonalizadaSegundoTeorema}
-                                onChange={(e) => handleFuncionPersonalizadaSegundoTeorema(e.target.value)}
-                                placeholder="Ej: x**2 + 3*x + 1"
-                                className="flex-1 p-2 border rounded text-sm"
-                              />
-                              <Button
-                                onClick={() => setMostrarTecladoSegundoTeorema(!mostrarTecladoSegundoTeorema)}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {mostrarTecladoSegundoTeorema ? "Ocultar" : "Mostrar"} Teclado
-                              </Button>
-                            </div>
-                            
-                            {errorFuncionPersonalizadaSegundoTeorema && (
-                              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                                {errorFuncionPersonalizadaSegundoTeorema}
-                              </div>
-                            )}
-                            
-                            {/* Teclado Matemático para función personalizada */}
-                            {mostrarTecladoSegundoTeorema && (
-                              <div className="bg-gray-50 p-4 rounded-lg mt-2">
-                                <h4 className="text-sm font-medium mb-2">Teclado Matemático</h4>
-                                <div className="grid grid-cols-6 gap-2">
-                                  {/* Números */}
-                                  {['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
-                                    <Button
-                                      key={num}
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + num)}
-                                      className="text-xs"
-                                    >
-                                      {num}
-                                    </Button>
-                                  ))}
-                                  
-                                  {/* Operaciones */}
-                                  {['+', '-', '*', '/', '^', '(', ')'].map(op => (
-                                    <Button
-                                      key={op}
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + op)}
-                                      className="text-xs"
-                                    >
-                                      {op}
-                                    </Button>
-                                  ))}
-                                  
-                                  {/* Funciones */}
-                                  {['sin', 'cos', 'tan', 'log', 'exp', 'sqrt'].map(func => (
-                                    <Button
-                                      key={func}
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + func + '(x)')}
-                                      className="text-xs"
-                                    >
-                                      {func}
-                                    </Button>
-                                  ))}
-                                  
-                                  {/* Variable x */}
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev + 'x')}
-                                    className="text-xs"
-                                  >
-                                    x
-                                  </Button>
-                                  
-                                  {/* Control */}
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setFuncionPersonalizadaSegundoTeorema(prev => prev.slice(0, -1))}
-                                    className="text-xs"
-                                  >
-                                    ←
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setFuncionPersonalizadaSegundoTeorema('')}
-                                    className="text-xs"
-                                  >
-                                    C
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -1623,14 +1653,20 @@ function TorreValorMedioDemo() {
                       <h3 className="text-lg font-semibold text-green-800 mb-2">Paso 2: Encuentra la antiderivada F(x)</h3>
                       <div className="mb-4">
                         <div className="text-gray-700 mb-2">
-                          Recuerda: F'(x) = f(x). ¿Qué función al derivarla da {funcionSegundoTeorema === 'seno' ? 'sin(x)' : 
+                          Recuerda: F'(x) = f(x). ¿Qué función al derivarla da {funcionSegundoTeorema === 'lineal' ? 'x' :
+                                                                                    funcionSegundoTeorema === 'cuadratica' ? 'x²' :
+                                                                                    funcionSegundoTeorema === 'seno' ? 'sin(x)' : 
                                                                                     funcionSegundoTeorema === 'coseno' ? 'cos(x)' :
-                                                                                    funcionSegundoTeorema === 'exponencial' ? 'e^x' : 'f(x)'}?
+                                                                                    funcionSegundoTeorema === 'exponencial' ? 'e^x' : 
+                                                                                    funcionSegundoTeorema === 'personalizada' ? (funcionPersonalizadaSegundoTeorema || 'f(x)') : 'sin(x)'}?
                         </div>
                         <div className="text-sm text-gray-600 mb-2">
-                          {funcionSegundoTeorema === 'seno' ? 'Ej: -cos(x), -Math.cos(x)' :
+                          {funcionSegundoTeorema === 'lineal' ? 'Ej: (x**2)/2, (x²)/2' :
+                           funcionSegundoTeorema === 'cuadratica' ? 'Ej: (x**3)/3, (x³)/3' :
+                           funcionSegundoTeorema === 'seno' ? 'Ej: -cos(x), -Math.cos(x)' :
                            funcionSegundoTeorema === 'coseno' ? 'Ej: sin(x), Math.sin(x)' :
                            funcionSegundoTeorema === 'exponencial' ? 'Ej: exp(x), Math.exp(x)' :
+                           funcionSegundoTeorema === 'personalizada' ? 'Ej: F(x) (función que al derivarla da ' + (funcionPersonalizadaSegundoTeorema || 'f(x)') + ')' :
                            'Ej: (x**2)/2, (x**3)/3'}
                         </div>
                       </div>
@@ -1642,7 +1678,7 @@ function TorreValorMedioDemo() {
                             type="text"
                             value={antiderivadaUsuario}
                             onChange={(e) => setAntiderivadaUsuario(e.target.value)}
-                            placeholder="Ej: -cos(x)"
+                            placeholder={funcionSegundoTeorema === 'personalizada' ? "Ej: F(x) (antiderivada de tu función)" : "Ej: -cos(x)"}
                             className="flex-1 p-2 border rounded text-sm"
                           />
                           <Button
