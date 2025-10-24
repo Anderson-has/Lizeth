@@ -28,6 +28,9 @@ export class EstadoSegundoTeorema {
         // Estado de validación
         this.antiderivadaValida = false
         this.evaluacionValida = false
+        
+        // Funciones completadas
+        this.funcionesCompletadas = []
         this.procesoCompletado = false
         
         // Métricas
@@ -143,6 +146,10 @@ export class EstadoSegundoTeorema {
         this.antiderivadaUsuario = antiderivada
         this.numeroIntentos++
         this.intentosAntiderivada++
+        
+        // ✅ MARCAR ANTIDERIVADA COMO VÁLIDA CUANDO SE ESTABLECE
+        this.antiderivadaValida = true
+        console.log('✅ Antiderivada marcada como válida:', antiderivada)
     }
 
     // ✅ ESTABLECER EVALUACIÓN
@@ -150,6 +157,10 @@ export class EstadoSegundoTeorema {
         this.evaluacionA = evaluacionA
         this.evaluacionB = evaluacionB
         this.intentosEvaluacion++
+        
+        // ✅ MARCAR EVALUACIÓN COMO VÁLIDA CUANDO SE ESTABLECE
+        this.evaluacionValida = true
+        console.log('✅ Evaluación marcada como válida:', { evaluacionA, evaluacionB })
     }
 
     // ✅ AVANZAR PASO
@@ -180,6 +191,12 @@ export class EstadoSegundoTeorema {
     completarProceso() {
         this.procesoCompletado = true
         this.tiempoPaso4 = Date.now() - this.tiempoInicio
+        
+        // ✅ AGREGAR FUNCIÓN COMPLETADA
+        if (this.tipoFuncion && !this.funcionesCompletadas.includes(this.tipoFuncion)) {
+            this.funcionesCompletadas.push(this.tipoFuncion)
+            console.log('✅ Función completada agregada:', this.tipoFuncion)
+        }
     }
 
     // ✅ RESETEAR ESTADO

@@ -716,12 +716,24 @@ function TorreValorMedioDemo() {
         
         // ✅ VERIFICAR LOGROS DEL SEGUNDO TEOREMA
         try {
+          console.log('🔍 ANTES de verificar logros - estado actual:')
+          console.log('- antiderivadaUsuario:', antiderivadaUsuario)
+          console.log('- escenario:', !!escenario)
+          console.log('- pasoActualSegundoTeorema:', pasoActualSegundoTeorema)
+          
           const logrosDesbloqueados = escenario.verificarLogrosSegundoTeorema()
+          console.log('🔍 DESPUÉS de verificar logros:')
+          console.log('- logrosDesbloqueados:', logrosDesbloqueados)
+          console.log('- logrosDesbloqueados.length:', logrosDesbloqueados.length)
+          
           if (logrosDesbloqueados.length > 0) {
             console.log('🏆 Logros Segundo Teorema desbloqueados:', logrosDesbloqueados)
             // Actualizar pasos habilitados basándose en los logros
             actualizarPasosHabilitados(logrosDesbloqueados)
+            console.log('✅ Pasos habilitados actualizados')
             // Aquí podrías mostrar una notificación al usuario
+          } else {
+            console.log('⚠️ No se desbloquearon logros')
           }
         } catch (error) {
           console.error('Error verificando logros Segundo Teorema:', error)

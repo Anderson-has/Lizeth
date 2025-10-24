@@ -341,15 +341,21 @@ export class GestorLogros {
 
   // ✅ VERIFICAR LOGROS SEGUNDO TEOREMA FUNDAMENTAL
   verificarLogrosSegundoTeorema(estudianteId, datosSegundoTeorema) {
+    console.log('🔍 VERIFICAR LOGROS SEGUNDO TEOREMA - INICIO')
+    console.log('- estudianteId:', estudianteId)
+    console.log('- datosSegundoTeorema:', datosSegundoTeorema)
+    
     const usuarios = this.servicioAuth.obtenerTodosLosUsuarios()
     const estudiante = usuarios.find(u => u.id === estudianteId)
     
     if (!estudiante || !estudiante.esEstudiante()) {
+      console.log('❌ No se encontró estudiante válido')
       return []
     }
 
     const logrosDesbloqueados = []
     const progreso = estudiante.obtenerEstadisticas()
+    console.log('- progreso del estudiante:', progreso)
 
     // Verificar cada logro del Segundo Teorema Fundamental
     for (const logro of this.logros) {
@@ -358,6 +364,7 @@ export class GestorLogros {
           logro.criterios?.teorema === 'segundo-teorema' &&
           !progreso.logros.includes(logro.id)) {
         
+        console.log(`🔍 Verificando logro: ${logro.id} - ${logro.nombre}`)
         if (this.verificarCriteriosSegundoTeorema(logro, datosSegundoTeorema)) {
           logrosDesbloqueados.push(logro)
           estudiante.agregarLogro(logro.id)
@@ -366,36 +373,69 @@ export class GestorLogros {
       }
     }
 
+    console.log('🔍 VERIFICAR LOGROS SEGUNDO TEOREMA - FIN')
+    console.log('- logros desbloqueados:', logrosDesbloqueados.length)
     return logrosDesbloqueados
   }
 
   // ✅ VERIFICAR CRITERIOS ESPECÍFICOS DEL SEGUNDO TEOREMA
   verificarCriteriosSegundoTeorema(logro, datosSegundoTeorema) {
-    const { pasoCompletado, pasosCompletados, funcionesCompletadas } = logro.criterios
+    console.log('🔍 Verificando criterios para logro:', logro.id, 'con datos:', datosSegundoTeorema)
 
     switch (logro.id) {
       case 'primera_antiderivada':
-        return datosSegundoTeorema.pasoCompletado === 'antiderivada' && 
-               datosSegundoTeorema.antiderivadaCorrecta
+        // Se desbloquea cuando se completa la antiderivada correctamente
+        const antiderivadaCompletada = datosSegundoTeorema.antiderivadaCorrecta && 
+                                     datosSegundoTeorema.pasoCompletado >= 2
+        console.log('🎯 Verificando primera_antiderivada:', {
+          antiderivadaCorrecta: datosSegundoTeorema.antiderivadaCorrecta,
+          pasoCompletado: datosSegundoTeorema.pasoCompletado,
+          resultado: antiderivadaCompletada
+        })
+        return antiderivadaCompletada
 
       case 'calculador_experto':
-        return datosSegundoTeorema.pasoCompletado === 'evaluacion' && 
-               datosSegundoTeorema.evaluacionCorrecta
+        // Se desbloquea cuando se completa la evaluación correctamente
+        const evaluacionCompletada = datosSegundoTeorema.evaluacionCorrecta && 
+                                   datosSegundoTeorema.pasoCompletado >= 3
+        console.log('⭐ Verificando calculador_experto:', {
+          evaluacionCorrecta: datosSegundoTeorema.evaluacionCorrecta,
+          pasoCompletado: datosSegundoTeorema.pasoCompletado,
+          resultado: evaluacionCompletada
+        })
+        return evaluacionCompletada
 
       case 'verificador':
-        return datosSegundoTeorema.pasosCompletados >= 4
+        // Se desbloquea cuando se completan los 4 pasos
+        const verificadorCompletado = datosSegundoTeorema.pasosCompletados >= 4
+        console.log('🛡️ Verificando verificador:', {
+          pasosCompletados: datosSegundoTeorema.pasosCompletados,
+          resultado: verificadorCompletado
+        })
+        return verificadorCompletado
 
       case 'maestro_potencias':
-        return funcionesCompletadas.every(func => 
-          datosSegundoTeorema.funcionesCompletadas?.includes(func)
-        )
+        // Se desbloquea cuando se completan funciones cuadrática y cúbica
+        const funcionesPotencias = datosSegundoTeorema.funcionesCompletadas?.includes('cuadratica') && 
+                                  datosSegundoTeorema.funcionesCompletadas?.includes('cubica')
+        console.log('⚡ Verificando maestro_potencias:', {
+          funcionesCompletadas: datosSegundoTeorema.funcionesCompletadas,
+          resultado: funcionesPotencias
+        })
+        return funcionesPotencias
 
       case 'trigonometrico':
-        return funcionesCompletadas.some(func => 
-          datosSegundoTeorema.funcionesCompletadas?.includes(func)
-        )
+        // Se desbloquea cuando se completa una función trigonométrica
+        const funcionesTrig = datosSegundoTeorema.funcionesCompletadas?.includes('seno') || 
+                             datosSegundoTeorema.funcionesCompletadas?.includes('coseno')
+        console.log('🕐 Verificando trigonometrico:', {
+          funcionesCompletadas: datosSegundoTeorema.funcionesCompletadas,
+          resultado: funcionesTrig
+        })
+        return funcionesTrig
 
       default:
+        console.log('❌ Logro no reconocido:', logro.id)
         return false
     }
   }
