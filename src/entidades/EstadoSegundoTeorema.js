@@ -58,6 +58,8 @@ export class EstadoSegundoTeorema {
 
     // ✅ ESTABLECER FUNCIÓN
     establecerFuncion(tipo, funcionPersonalizada = '') {
+        console.log('🔄 EstadoSegundoTeorema.establecerFuncion ejecutado:', { tipo, funcionPersonalizada })
+        
         this.tipoFuncion = tipo
         this.funcionPersonalizada = funcionPersonalizada
         
@@ -65,14 +67,17 @@ export class EstadoSegundoTeorema {
             case 'seno':
                 this.funcionActual = (x) => Math.sin(x)
                 this.antiderivadaCorrecta = '-cos(x)'
+                console.log('✅ Función seno establecida')
                 break
             case 'coseno':
                 this.funcionActual = (x) => Math.cos(x)
                 this.antiderivadaCorrecta = 'sin(x)'
+                console.log('✅ Función coseno establecida')
                 break
             case 'exponencial':
                 this.funcionActual = (x) => Math.exp(x)
                 this.antiderivadaCorrecta = 'exp(x)'
+                console.log('✅ Función exponencial establecida')
                 break
             case 'personalizada':
                 if (funcionPersonalizada) {
@@ -82,20 +87,27 @@ export class EstadoSegundoTeorema {
                         this.errorFuncionPersonalizada = ''
                         // Para función personalizada, no podemos determinar automáticamente la antiderivada
                         this.antiderivadaCorrecta = 'F(x)' // Placeholder
+                        console.log('✅ Función personalizada establecida')
                     } catch (error) {
                         this.funcionPersonalizadaValida = false
                         this.errorFuncionPersonalizada = 'Sintaxis inválida'
                         this.funcionActual = null
+                        console.error('❌ Error en función personalizada:', error)
                     }
                 } else {
                     this.funcionPersonalizadaValida = false
                     this.errorFuncionPersonalizada = 'Función personalizada requerida'
                     this.funcionActual = null
+                    console.log('⚠️ Función personalizada requerida')
                 }
                 break
             default:
                 this.inicializarFuncionPorDefecto()
+                console.log('⚠️ Tipo de función no reconocido, usando función por defecto')
         }
+        
+        console.log('- función actual:', typeof this.funcionActual, !!this.funcionActual)
+        console.log('- tipo función:', this.tipoFuncion)
     }
 
     // ✅ ESTABLECER LÍMITES

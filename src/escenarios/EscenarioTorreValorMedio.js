@@ -414,6 +414,9 @@ export class EscenarioTorreValorMedio extends Escenario {
     configurarCanvasSegundoTeorema(canvasSegundoTeorema) {
         console.log('🎨 configurarCanvasSegundoTeorema ejecutado')
         console.log('- canvasSegundoTeorema:', !!canvasSegundoTeorema)
+        console.log('- canvasSegundoTeorema tipo:', typeof canvasSegundoTeorema)
+        console.log('- canvasSegundoTeorema width:', canvasSegundoTeorema?.width)
+        console.log('- canvasSegundoTeorema height:', canvasSegundoTeorema?.height)
         console.log('- inicializado:', this.inicializado)
         
         try {
@@ -424,6 +427,7 @@ export class EscenarioTorreValorMedio extends Escenario {
             console.log('✅ Creando RenderizadorSegundoTeorema...')
             this.renderizadorSegundoTeorema = new RenderizadorSegundoTeorema(canvasSegundoTeorema)
             console.log('✅ RenderizadorSegundoTeorema creado:', !!this.renderizadorSegundoTeorema)
+            console.log('- renderizadorSegundoTeorema tipo:', typeof this.renderizadorSegundoTeorema)
             return this
         } catch (error) {
             console.error('❌ Error configurando canvas Segundo Teorema:', error)
@@ -433,8 +437,18 @@ export class EscenarioTorreValorMedio extends Escenario {
 
     // ✅ ESTABLECER FUNCIÓN SEGUNDO TEOREMA
     establecerFuncionSegundoTeorema(tipo, funcionPersonalizada = '') {
+        console.log('🔄 establecerFuncionSegundoTeorema ejecutado:', { tipo, funcionPersonalizada })
+        console.log('- estadoSegundoTeorema:', !!this.estadoSegundoTeorema)
+        console.log('- renderizadorSegundoTeorema:', !!this.renderizadorSegundoTeorema)
+        
         try {
             this.estadoSegundoTeorema.establecerFuncion(tipo, funcionPersonalizada)
+            console.log('✅ Función establecida en el estado')
+            
+            // Verificar que la función se estableció correctamente
+            const funcionActual = this.estadoSegundoTeorema.obtenerFuncionActual()
+            console.log('- función actual:', typeof funcionActual, !!funcionActual)
+            
             this.renderizarSegundoTeorema()
             return this
         } catch (error) {
@@ -551,9 +565,15 @@ export class EscenarioTorreValorMedio extends Escenario {
     renderizarSegundoTeorema() {
         console.log('🎨 renderizarSegundoTeorema ejecutado')
         console.log('- renderizadorSegundoTeorema:', !!this.renderizadorSegundoTeorema)
+        console.log('- estadoSegundoTeorema:', !!this.estadoSegundoTeorema)
         
         if (!this.renderizadorSegundoTeorema) {
             console.log('❌ No hay renderizador Segundo Teorema')
+            return
+        }
+        
+        if (!this.estadoSegundoTeorema) {
+            console.log('❌ No hay estado Segundo Teorema')
             return
         }
         
@@ -564,9 +584,20 @@ export class EscenarioTorreValorMedio extends Escenario {
             
             console.log('📊 Datos para renderizado:', {
                 funcion: !!funcion,
+                funcionTipo: typeof funcion,
                 limites,
                 resultado
             })
+            
+            // Probar la función
+            if (funcion) {
+                try {
+                    const testValue = funcion(1)
+                    console.log('🧪 Prueba de función en x=1:', testValue)
+                } catch (error) {
+                    console.error('❌ Error probando función:', error)
+                }
+            }
             
             if (funcion) {
                 const xMin = Math.min(limites.a, limites.b) - 1
@@ -580,6 +611,32 @@ export class EscenarioTorreValorMedio extends Escenario {
                     limiteB: limites.b
                 })
                 
+                // Calcular resultado automáticamente si no existe
+                let resultadoFinal = resultado
+                if (!resultadoFinal || resultadoFinal === 0) {
+                    try {
+                        // Calcular integral numéricamente para mostrar el resultado
+                        const numPuntos = 1000
+                        let suma = 0
+                        const dx = (limites.b - limites.a) / numPuntos
+                        
+                        for (let i = 0; i < numPuntos; i++) {
+                            const x = limites.a + i * dx
+                            const y = funcion(x)
+                            if (isFinite(y)) {
+                                suma += y * dx
+                            }
+                        }
+                        
+                        resultadoFinal = suma
+                        this.estadoSegundoTeorema.establecerResultadoCalculado(resultadoFinal)
+                        console.log('🧮 Resultado calculado automáticamente:', resultadoFinal)
+                    } catch (error) {
+                        console.error('Error calculando resultado automático:', error)
+                        resultadoFinal = 0
+                    }
+                }
+                
                 this.renderizadorSegundoTeorema.renderizarVisualizacionCompleta(
                     funcion, 
                     limites.a, 
@@ -588,7 +645,7 @@ export class EscenarioTorreValorMedio extends Escenario {
                     xMax, 
                     yMin, 
                     yMax, 
-                    resultado
+                    resultadoFinal
                 )
                 
                 console.log('✅ Renderizado Segundo Teorema completado')

@@ -94,6 +94,9 @@ export const useTorreValorMedio = (): TorreValorMedioState => {
       escenarioFactoryRef.current = new EscenarioFactory()
       escenarioRef.current = escenarioFactoryRef.current.crearEscenario('torre-valor-medio')
       
+      // Inicializar el escenario
+      escenarioRef.current.inicializar()
+      
       console.log('🏰 Escenario Torre del Valor Medio inicializado:', escenarioRef.current)
       
       setEscenario(escenarioRef.current)

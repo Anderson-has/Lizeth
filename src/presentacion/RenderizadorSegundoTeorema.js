@@ -117,12 +117,18 @@ export class RenderizadorSegundoTeorema {
 
     // ✅ DIBUJAR FUNCIÓN
     dibujarFuncion(funcion, xMin, xMax, color = this.configuracion.colorFuncion) {
+        console.log('🎨 dibujarFuncion ejecutado')
+        console.log('- funcion:', typeof funcion, !!funcion)
+        console.log('- xMin:', xMin, 'xMax:', xMax)
+        console.log('- color:', color)
+        
         this.ctx.strokeStyle = color
         this.ctx.lineWidth = this.configuracion.grosorLinea
         this.ctx.beginPath()
         
         let primerPunto = true
         const numPuntos = 1000
+        let puntosDibujados = 0
         
         for (let i = 0; i <= numPuntos; i++) {
             const x = xMin + (i / numPuntos) * (xMax - xMin)
@@ -140,13 +146,15 @@ export class RenderizadorSegundoTeorema {
                         } else {
                             this.ctx.lineTo(pantallaX, pantallaY)
                         }
+                        puntosDibujados++
                     }
                 }
             } catch (error) {
-                // Continuar si hay error en la evaluación
+                console.error('Error evaluando función en x=' + x + ':', error)
             }
         }
         
+        console.log('- puntos dibujados:', puntosDibujados)
         this.ctx.stroke()
     }
 
@@ -308,21 +316,46 @@ export class RenderizadorSegundoTeorema {
 
     // ✅ RENDERIZAR VISUALIZACIÓN COMPLETA
     renderizarVisualizacionCompleta(funcion, a, b, xMin, xMax, yMin, yMax, resultado) {
+        console.log('🎨 RenderizadorSegundoTeorema.renderizarVisualizacionCompleta ejecutado')
+        console.log('- funcion:', typeof funcion, !!funcion)
+        console.log('- a:', a, 'b:', b)
+        console.log('- xMin:', xMin, 'xMax:', xMax, 'yMin:', yMin, 'yMax:', yMax)
+        console.log('- resultado:', resultado)
+        console.log('- canvas:', !!this.canvas, 'ctx:', !!this.ctx)
+        
         // Limpiar canvas
         this.ctx.clearRect(0, 0, this.configuracion.ancho, this.configuracion.alto)
         
         // Configurar escala
         this.configurarEscala(xMin, xMax, yMin, yMax)
+        console.log('- escala configurada:', this.escalaX, this.escalaY)
         
         // Dibujar elementos en orden
+        console.log('📐 Dibujando cuadrícula...')
         this.dibujarCuadricula(xMin, xMax, yMin, yMax)
+        
+        console.log('📐 Dibujando ejes...')
         this.dibujarEjes(xMin, xMax, yMin, yMax)
+        
+        console.log('📐 Dibujando área bajo la curva...')
         this.dibujarAreaBajoCurva(funcion, a, b, xMin, xMax, yMin, yMax)
+        
+        console.log('📐 Dibujando líneas verticales...')
         this.dibujarLineasVerticales(a, b, xMin, xMax, yMin, yMax)
+        
+        console.log('📐 Dibujando función...')
         this.dibujarFuncion(funcion, xMin, xMax)
+        
+        console.log('📐 Dibujando puntos límite...')
         this.dibujarPuntosLimite(funcion, a, b, xMin, xMax, yMin, yMax)
+        
+        console.log('📐 Dibujando etiquetas...')
         this.dibujarEtiquetasLimites(a, b, xMin, xMax, yMin, yMax)
+        
+        console.log('📐 Dibujando información integral...')
         this.dibujarInformacionIntegral(funcion, a, b, resultado)
+        
+        console.log('✅ Renderizado completo finalizado')
     }
 
     // ✅ RENDERIZAR PASO A PASO

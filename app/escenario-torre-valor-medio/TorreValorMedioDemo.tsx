@@ -147,17 +147,68 @@ function TorreValorMedioDemo() {
     }
   }, [configurarCanvas, renderizarCompleto])
 
-  // ✅ CONFIGURAR CANVAS SEGUNDO TEOREMA
+  // ✅ CONFIGURAR CANVAS SEGUNDO TEOREMA CON SISTEMA ROBUSTO
   useEffect(() => {
-    if (canvasSegundoTeoremaRef.current && escenario && teoremaActivo === 'segundo-teorema') {
-      try {
-        escenario.configurarCanvasSegundoTeorema(canvasSegundoTeoremaRef.current)
-        console.log('✅ Canvas Segundo Teorema configurado')
-      } catch (error) {
-        console.error('❌ Error configurando canvas Segundo Teorema:', error)
+    console.log('🔄 useEffect configurarCanvasSegundoTeorema ejecutado:', {
+      canvas: !!canvasSegundoTeoremaRef.current,
+      canvasElement: canvasSegundoTeoremaRef.current,
+      escenario: !!escenario,
+      teoremaActivo
+    })
+    
+    // Verificar cada condición individualmente
+    const tieneCanvas = !!canvasSegundoTeoremaRef.current
+    const tieneEscenario = !!escenario
+    const esSegundoTeorema = teoremaActivo === 'segundo-teorema'
+    
+    console.log('🔍 Verificando condiciones:', {
+      tieneCanvas,
+      tieneEscenario,
+      esSegundoTeorema,
+      todasCumplidas: tieneCanvas && tieneEscenario && esSegundoTeorema
+    })
+    
+    if (tieneCanvas && tieneEscenario && esSegundoTeorema) {
+      // Sistema robusto de inicialización con timeout
+      const inicializarCanvas = () => {
+        try {
+          console.log('🎯 Configurando canvas Segundo Teorema...')
+          
+          // Configurar dimensiones explícitas del canvas
+          const canvas = canvasSegundoTeoremaRef.current
+          if (canvas) {
+            canvas.width = 800
+            canvas.height = 400
+            console.log('📐 Dimensiones del canvas configuradas:', { width: canvas.width, height: canvas.height })
+          }
+          
+          escenario.configurarCanvasSegundoTeorema(canvas)
+          console.log('✅ Canvas Segundo Teorema configurado')
+        } catch (error) {
+          console.error('❌ Error configurando canvas Segundo Teorema:', error)
+          // Reintentar después de un pequeño delay
+          setTimeout(() => {
+            try {
+              console.log('🔄 Reintentando configuración del canvas...')
+              escenario.configurarCanvasSegundoTeorema(canvasSegundoTeoremaRef.current)
+              console.log('✅ Canvas Segundo Teorema configurado en segundo intento')
+            } catch (retryError) {
+              console.error('❌ Error en segundo intento:', retryError)
+            }
+          }, 100)
+        }
       }
+      
+      // Pequeño delay para asegurar que el canvas esté completamente renderizado
+      setTimeout(inicializarCanvas, 50)
+    } else {
+      console.log('⚠️ Condiciones no cumplidas para configurar canvas Segundo Teorema:', {
+        faltaCanvas: !tieneCanvas,
+        faltaEscenario: !tieneEscenario,
+        noEsSegundoTeorema: !esSegundoTeorema
+      })
     }
-  }, [escenario, teoremaActivo, canvasSegundoTeoremaRef.current])
+  }, [escenario, teoremaActivo])
 
   // ✅ RENDERIZAR SEGUNDO TEOREMA CUANDO CAMBIEN LOS PARÁMETROS
   useEffect(() => {
@@ -481,16 +532,80 @@ function TorreValorMedioDemo() {
 
   // ✅ MANEJAR FUNCIÓN SEGUNDO TEOREMA
   const handleFuncionSegundoTeorema = useCallback((tipo: string) => {
+    console.log('🔄 handleFuncionSegundoTeorema ejecutado:', { tipo, escenario: !!escenario })
     setFuncionSegundoTeorema(tipo)
     if (escenario) {
       escenario.cambiarTeoremaActivo('segundo-teorema')
       if (tipo === 'personalizada') {
         // Para función personalizada, no establecer función aún hasta que sea válida
         setMostrarTecladoSegundoTeorema(true)
+        console.log('📝 Función personalizada seleccionada')
       } else {
+        console.log('🎯 Estableciendo función del segundo teorema:', tipo)
         escenario.establecerFuncionSegundoTeorema(tipo, '')
         setMostrarTecladoSegundoTeorema(false)
+        console.log('✅ Función establecida en el escenario')
+        
+        // Forzar renderizado inmediato después de establecer la función
+        setTimeout(() => {
+          try {
+            console.log('🎨 Forzando renderizado después de cambiar función...')
+            escenario.renderizarSegundoTeorema()
+            console.log('✅ Renderizado forzado completado')
+          } catch (error) {
+            console.error('❌ Error en renderizado forzado:', error)
+          }
+        }, 100)
       }
+    } else {
+      console.log('❌ No hay escenario disponible')
+    }
+  }, [escenario])
+
+  // ✅ DEBUG CANVAS SEGUNDO TEOREMA
+  const handleDebugCanvasSegundoTeorema = useCallback(() => {
+    console.log('🔧 Debug Canvas Segundo Teorema ejecutado')
+    
+    const canvas = canvasSegundoTeoremaRef.current
+    if (!canvas) {
+      console.error('❌ Canvas no disponible')
+      return
+    }
+    
+    try {
+      // Dibujo manual básico para verificar funcionamiento del canvas
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        console.error('❌ Contexto del canvas no disponible')
+        return
+      }
+      
+      // Limpiar canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      
+      // Dibujar un rectángulo de prueba
+      ctx.fillStyle = '#3b82f6'
+      ctx.fillRect(50, 50, 100, 50)
+      
+      // Dibujar texto
+      ctx.fillStyle = '#1f2937'
+      ctx.font = '16px Arial'
+      ctx.fillText('Canvas Funcionando', 200, 100)
+      
+      console.log('✅ Debug canvas completado - dibujo manual realizado')
+      
+      // Intentar reinicializar el renderizador
+      if (escenario) {
+        try {
+          console.log('🔄 Reinicializando renderizador...')
+          escenario.configurarCanvasSegundoTeorema(canvas)
+          console.log('✅ Renderizador reinicializado')
+        } catch (error) {
+          console.error('❌ Error reinicializando renderizador:', error)
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error en debug canvas:', error)
     }
   }, [escenario])
 
@@ -521,10 +636,15 @@ function TorreValorMedioDemo() {
 
   // ✅ MANEJAR LÍMITES SEGUNDO TEOREMA
   const handleLimitesSegundoTeorema = useCallback((a: number, b: number) => {
-    setLimiteASegundoTeorema(a)
-    setLimiteBSegundoTeorema(b)
+    // Asegurar que a < b
+    const limiteA = Math.min(a, b)
+    const limiteB = Math.max(a, b)
+    
+    setLimiteASegundoTeorema(limiteA)
+    setLimiteBSegundoTeorema(limiteB)
+    
     if (escenario) {
-      escenario.establecerLimitesSegundoTeorema(a, b)
+      escenario.establecerLimitesSegundoTeorema(limiteA, limiteB)
     }
   }, [escenario])
 
@@ -1682,6 +1802,16 @@ function TorreValorMedioDemo() {
                       <RotateCcw className="h-4 w-4 mr-2" />
                       Resetear Proceso
                     </Button>
+
+                    {/* Botón Debug Canvas */}
+                    <Button
+                      variant="outline"
+                      onClick={handleDebugCanvasSegundoTeorema}
+                      className="w-full bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100"
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      Debug Canvas
+                    </Button>
                   </div>
 
                   {/* Gráfica del Segundo Teorema */}
@@ -1694,13 +1824,21 @@ function TorreValorMedioDemo() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="bg-white border rounded-lg p-4">
+                        <div className="bg-white border-2 border-gray-400 rounded-lg p-4 shadow-lg">
+                          <div className="mb-2 text-sm text-gray-600">
+                            Estado del Canvas: {canvasSegundoTeoremaRef.current ? '✅ Listo' : '⏳ Inicializando...'}
+                          </div>
                           <canvas
                             ref={canvasSegundoTeoremaRef}
                             width={800}
                             height={400}
-                            className="w-full h-64 border border-gray-300 rounded"
-                            style={{ width: '100%', height: '256px', display: 'block' }}
+                            className="w-full h-64 border-2 border-gray-500 rounded shadow-md"
+                            style={{ 
+                              width: '100%', 
+                              height: '256px', 
+                              display: 'block',
+                              backgroundColor: '#f8fafc'
+                            }}
                           />
                         </div>
                       </CardContent>
