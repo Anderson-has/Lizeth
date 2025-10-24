@@ -64,6 +64,16 @@ export class EstadoSegundoTeorema {
         this.funcionPersonalizada = funcionPersonalizada
         
         switch (tipo) {
+            case 'lineal':
+                this.funcionActual = (x) => x
+                this.antiderivadaCorrecta = 'x²/2'
+                console.log('✅ Función lineal establecida')
+                break
+            case 'cuadratica':
+                this.funcionActual = (x) => x * x
+                this.antiderivadaCorrecta = 'x³/3'
+                console.log('✅ Función cuadrática establecida')
+                break
             case 'seno':
                 this.funcionActual = (x) => Math.sin(x)
                 this.antiderivadaCorrecta = '-cos(x)'

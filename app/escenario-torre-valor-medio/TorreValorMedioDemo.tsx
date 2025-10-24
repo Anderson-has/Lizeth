@@ -1441,7 +1441,21 @@ function TorreValorMedioDemo() {
                         {/* Tipo de función */}
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Tipo de función</label>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button
+                              variant={funcionSegundoTeorema === 'lineal' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => handleFuncionSegundoTeorema('lineal')}
+                            >
+                              x
+                            </Button>
+                            <Button
+                              variant={funcionSegundoTeorema === 'cuadratica' ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => handleFuncionSegundoTeorema('cuadratica')}
+                            >
+                              x²
+                            </Button>
                             <Button
                               variant={funcionSegundoTeorema === 'seno' ? 'default' : 'outline'}
                               size="sm"
@@ -1487,7 +1501,9 @@ function TorreValorMedioDemo() {
                       <h3 className="text-lg font-semibold text-blue-800 mb-2">Paso 1: Función dada</h3>
                       <div className="text-center">
                         <div className="text-2xl font-mono mb-2">
-                          f(x) = {funcionSegundoTeorema === 'seno' ? 'sin(x)' : 
+                          f(x) = {funcionSegundoTeorema === 'lineal' ? 'x' :
+                                 funcionSegundoTeorema === 'cuadratica' ? 'x²' :
+                                 funcionSegundoTeorema === 'seno' ? 'sin(x)' : 
                                  funcionSegundoTeorema === 'coseno' ? 'cos(x)' :
                                  funcionSegundoTeorema === 'exponencial' ? 'e^x' : 
                                  funcionSegundoTeorema === 'personalizada' ? (funcionPersonalizadaSegundoTeorema || 'f(x)') : 'sin(x)'}
