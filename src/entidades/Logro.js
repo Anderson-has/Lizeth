@@ -1,0 +1,118 @@
+/**
+ * ENTIDAD: Logro
+ * RESPONSABILIDAD: Representar un logro o certificación que puede obtener un estudiante
+ * SRP: Solo maneja los datos y comportamiento de un logro individual
+ */
+export class Logro {
+  constructor(datos) {
+    this.id = datos.id || this.generarId()
+    this.nombre = datos.nombre
+    this.descripcion = datos.descripcion
+    this.tipo = datos.tipo // 'tiempo', 'completitud', 'especial', 'secuencial'
+    this.criterios = datos.criterios || {}
+    this.icono = datos.icono || '🏆'
+    this.color = datos.color || 'gold'
+    this.puntos = datos.puntos || 10
+    this.raridad = datos.raridad || 'comun' // 'comun', 'raro', 'epico', 'legendario'
+    this.fechaCreacion = datos.fechaCreacion || new Date()
+    this.activo = datos.activo !== undefined ? datos.activo : true
+  }
+
+  generarId() {
+    return 'logro_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+  }
+
+  verificarCriterios(progresoEstudiante) {
+    switch (this.tipo) {
+      case 'tiempo':
+        return this.verificarCriteriosTiempo(progresoEstudiante)
+      case 'completitud':
+        return this.verificarCriteriosCompletitud(progresoEstudiante)
+      case 'especial':
+        return this.verificarCriteriosEspeciales(progresoEstudiante)
+      case 'secuencial':
+        return this.verificarCriteriosSecuenciales(progresoEstudiante)
+      default:
+        return false
+    }
+  }
+
+  verificarCriteriosTiempo(progreso) {
+    const tiempoRequerido = this.criterios.tiempoMinimo || 0
+    return progreso.tiempoTotal >= tiempoRequerido
+  }
+
+  verificarCriteriosCompletitud(progreso) {
+    const escenariosRequeridos = this.criterios.escenariosCompletados || []
+    return escenariosRequeridos.every(escenario => 
+      progreso.escenariosCompletados.includes(escenario)
+    )
+  }
+
+  verificarCriteriosEspeciales(progreso) {
+    // Logros especiales como "Primer Acceso", "Explorador", etc.
+    switch (this.id) {
+      case 'primer_acceso':
+        return progreso.historialActividad.length === 1
+      case 'explorador':
+        return progreso.historialActividad.length >= 10
+      case 'persistente':
+        return progreso.tiempoTotal >= 3600000 // 1 hora
+      default:
+        return false
+    }
+  }
+
+  verificarCriteriosSecuenciales(progreso) {
+    const secuenciaRequerida = this.criterios.secuencia || []
+    const historial = progreso.historialActividad || []
+    
+    // Verificar si el estudiante completó los escenarios en el orden requerido
+    let indiceSecuencia = 0
+    for (const actividad of historial) {
+      if (actividad.escenario === secuenciaRequerida[indiceSecuencia]) {
+        indiceSecuencia++
+        if (indiceSecuencia === secuenciaRequerida.length) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  obtenerColorRaridad() {
+    const colores = {
+      'comun': 'text-gray-500',
+      'raro': 'text-blue-500',
+      'epico': 'text-purple-500',
+      'legendario': 'text-yellow-500'
+    }
+    return colores[this.raridad] || colores.comun
+  }
+
+  obtenerFondoRaridad() {
+    const fondos = {
+      'comun': 'bg-gray-100',
+      'raro': 'bg-blue-100',
+      'epico': 'bg-purple-100',
+      'legendario': 'bg-yellow-100'
+    }
+    return fondos[this.raridad] || fondos.comun
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      nombre: this.nombre,
+      descripcion: this.descripcion,
+      tipo: this.tipo,
+      criterios: this.criterios,
+      icono: this.icono,
+      color: this.color,
+      puntos: this.puntos,
+      raridad: this.raridad,
+      fechaCreacion: this.fechaCreacion,
+      activo: this.activo
+    }
+  }
+}
